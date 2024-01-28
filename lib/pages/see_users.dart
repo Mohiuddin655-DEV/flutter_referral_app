@@ -37,18 +37,20 @@ class SeeAllUsersPage extends StatelessWidget {
                   ),
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
-                    onTap: () => Dialogs.showAlert(
-                      context,
-                      title: "Update",
-                      message: "Are you sure, update redeemed duration?",
-                    ).then((value) {
-                      if (value) {
-                        ReferralService.updateDuration(
-                          uid: item.id,
-                          allow: (item.rewardDuration ?? 0) != 0,
-                        );
-                      }
-                    }),
+                    onTap: () {
+                      Dialogs.showAlert(
+                        context,
+                        title: "Update",
+                        message: "Are you sure, update redeemed duration?",
+                      ).then((value) {
+                        if (value) {
+                          ReferralService.updateDuration(
+                            uid: item.id,
+                            allow: (item.rewardDuration ?? 0) != 0,
+                          );
+                        }
+                      });
+                    },
                     contentPadding: const EdgeInsets.only(
                       left: 24,
                     ),

@@ -82,21 +82,11 @@ class Dialogs extends StatefulWidget {
 
   static Future<bool> showLoading(
     BuildContext context, {
-    String? title,
-    TextStyle? titleStyle,
-    String? message,
-    TextStyle? messageStyle,
     Key? key,
   }) {
     return showCupertinoDialog(
       context: context,
-      builder: (_) => Dialogs.loading(
-        key: key,
-        title: title,
-        titleStyle: titleStyle,
-        message: message,
-        messageStyle: messageStyle,
-      ),
+      builder: (_) => Dialogs.loading(key: key),
     ).onError((_, __) => null).then((_) => _ is bool ? _ : false);
   }
 
@@ -140,14 +130,7 @@ class Dialogs extends StatefulWidget {
         key: key,
       );
     } else if (type.isLoading) {
-      return showLoading(
-        context,
-        title: title,
-        titleStyle: titleStyle,
-        message: message,
-        messageStyle: messageStyle,
-        key: key,
-      );
+      return showLoading(context, key: key);
     } else {
       return showMessage(
         context,
@@ -217,6 +200,8 @@ class _DialogsState extends State<Dialogs> {
   List<Widget> get _actions {
     if (widget.type.isAlert) {
       return [_negativeButton, _positiveButton];
+    } else if (type.isLoading) {
+      return [];
     } else {
       return [_positiveButton];
     }
@@ -264,11 +249,19 @@ class _DialogsState extends State<Dialogs> {
     } else if (widget.type.isLoading) {
       return const Material(
         color: Colors.transparent,
-        child: SizedBox(
-          width: 30,
-          height: 30,
-          child: CircularProgressIndicator(
-            color: Colors.white,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Align(
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeAlign: BorderSide.strokeAlignInside,
+                strokeCap: StrokeCap.round,
+              ),
+            ),
           ),
         ),
       );
@@ -288,11 +281,19 @@ class _DialogsState extends State<Dialogs> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoAlertDialog(
+    final child = CupertinoAlertDialog(
       actions: _actions,
       title: _title(context),
       content: _content(context),
     );
+    if (type.isLoading) {
+      return Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: child,
+      );
+    } else {
+      return child;
+    }
   }
 }
 
@@ -339,11 +340,13 @@ class ActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       child: GestureDetector(
         onTap: onClick != null ? () => onClick?.call(context) : null,
         child: Container(
           alignment: Alignment.center,
           padding: padding,
+          color: Colors.transparent,
           child: child ?? Text(text, style: style),
         ),
       ),
