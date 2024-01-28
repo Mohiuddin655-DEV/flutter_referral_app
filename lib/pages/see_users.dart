@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_referral_app/pages/components/dialogs.dart';
 
 import '../services/referral_service.dart';
-import 'components/redeem_dialog.dart';
 
 class SeeAllUsersPage extends StatelessWidget {
   const SeeAllUsersPage({super.key});
@@ -38,73 +37,18 @@ class SeeAllUsersPage extends StatelessWidget {
                   ),
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
-                    onTap: () {
-                      showCupertinoDialog(
-                        context: context,
-                        builder: (context) {
-                          return CupertinoAlertDialog(
-                            title: const Text("Update"),
-                            content: const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Are you sure, update redeemed duration?",
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            actions: [
-                              Material(
-                                color: Colors.transparent,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 24,
-                                    ),
-                                    child: const Text(
-                                      "CANCEL",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Material(
-                                color: Colors.transparent,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    ReferralService.updateDuration(
-                                      uid: item.id,
-                                      allow: (item.rewardDuration ?? 0) != 0,
-                                    );
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                      horizontal: 24,
-                                    ),
-                                    child: const Text(
-                                      "OK",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
+                    onTap: () => Dialogs.showAlert(
+                      context,
+                      title: "Update",
+                      message: "Are you sure, update redeemed duration?",
+                    ).then((value) {
+                      if (value) {
+                        ReferralService.updateDuration(
+                          uid: item.id,
+                          allow: (item.rewardDuration ?? 0) != 0,
+                        );
+                      }
+                    }),
                     contentPadding: const EdgeInsets.only(
                       left: 24,
                     ),
@@ -124,14 +68,14 @@ class SeeAllUsersPage extends StatelessWidget {
                     ),
                     trailing: GestureDetector(
                       onTap: !item.isRedeemed
-                          ? () {
-                              RedeemDialog.show(
-                                context: context,
-                                callback: (context, value) {
+                          ? () => Dialogs.showEditor(
+                                context,
+                                title: "Apply redeem code",
+                              ).then((value) {
+                                if (value.length == 6) {
                                   ReferralService.redeemCode(item.id, value);
-                                },
-                              );
-                            }
+                                }
+                              })
                           : null,
                       child: Container(
                         margin: const EdgeInsets.all(8),
