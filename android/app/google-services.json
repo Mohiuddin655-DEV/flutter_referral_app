@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "595717296897",
+    "project_id": "referral-bd",
+    "storage_bucket": "referral-bd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:595717296897:android:61dcd706ba27da77608100",
+        "android_client_info": {
+          "package_name": "com.example.flutter_referral_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFUt-fPjTqEOKCLkN9kcCA0VM6Z80cUz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
