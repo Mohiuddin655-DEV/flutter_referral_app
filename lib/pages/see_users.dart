@@ -1,6 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../services/user_service.dart';
+import '../services/referral_service.dart';
 import 'components/add_redeem_dialog.dart';
 
 class SeeAllUsersPage extends StatelessWidget {
@@ -15,7 +16,7 @@ class SeeAllUsersPage extends StatelessWidget {
       ),
       body: SafeArea(
         child: StreamBuilder(
-          stream: UserService.getStreamedUsers(),
+          stream: ReferralService.getStreamedUsers(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -30,29 +31,92 @@ class SeeAllUsersPage extends StatelessWidget {
                 final item = items[index];
                 return Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
+                    color: item.isEligible
+                        ? Colors.green.shade800
+                        : Colors.red.shade800,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
                     onTap: () {
-                      UserService.changeRedeem(
-                        uid: item.id,
-                        allow: (item.rewardDuration ?? 0) != 0,
+                      showCupertinoDialog(
+                        context: context,
+                        builder: (context) {
+                          return CupertinoAlertDialog(
+                            title: const Text("Update"),
+                            content: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Are you sure, update redeemed duration?",
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            actions: [
+                              Material(
+                                color: Colors.transparent,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 24,
+                                    ),
+                                    child: const Text(
+                                      "CANCEL",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    ReferralService.updateDuration(
+                                      uid: item.id,
+                                      allow: (item.rewardDuration ?? 0) != 0,
+                                    );
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                      horizontal: 24,
+                                    ),
+                                    child: const Text(
+                                      "OK",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                     contentPadding: const EdgeInsets.only(
                       left: 24,
                     ),
                     title: Text(
-                      item.name ?? "Unknown",
+                      item.referralCode ?? "Unknown",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                       ),
                     ),
                     subtitle: Text(
-                      item.email ?? "example@gmail.com",
+                      "${item.rewardDuration ?? 0}",
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -64,7 +128,7 @@ class SeeAllUsersPage extends StatelessWidget {
                               AddRedeemDialog.show(
                                 context: context,
                                 callback: (context, value) {
-                                  UserService.addRedeem(item.id, value);
+                                  ReferralService.redeemCode(item.id, value);
                                 },
                               );
                             }
@@ -80,9 +144,7 @@ class SeeAllUsersPage extends StatelessWidget {
                           horizontal: 24,
                         ),
                         child: Text(
-                          item.isRedeemed
-                              ? "${item.rewardDuration ?? 0}"
-                              : "ADD",
+                          item.redeemedCode ?? "ADD",
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

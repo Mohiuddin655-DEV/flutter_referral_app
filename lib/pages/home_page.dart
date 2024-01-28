@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../services/user_service.dart';
+import '../services/referral_service.dart';
 import 'see_users.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,9 +11,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final etEmail = TextEditingController(text: "mr.x@gmail.com");
-  final etName = TextEditingController(text: "Mr. X");
-  final etPassword = TextEditingController(text: "123456");
   final etReferralCode = TextEditingController(text: "");
   bool isLoading = false;
 
@@ -31,10 +28,11 @@ class _HomePageState extends State<HomePage> {
             vertical: 24,
           ),
           children: [
-            EditField(controller: etName, hint: "Name"),
-            EditField(controller: etEmail, hint: "Email"),
-            EditField(controller: etPassword, hint: "Password", readOnly: true),
-            EditField(controller: etReferralCode, hint: "Refer code"),
+            EditField(
+              controller: etReferralCode,
+              hint: "CODE",
+              centerText: true,
+            ),
             const SizedBox(height: 24),
             SizedBox(
               height: 40,
@@ -59,15 +57,9 @@ class _HomePageState extends State<HomePage> {
                       onPressed: !isLoading
                           ? () {
                               setState(() => isLoading = true);
-                              UserService.createUser(UserModel(
-                                email: etEmail.text,
-                                name: etName.text,
+                              ReferralService.createUser(UserModel(
                                 redeemedCode: etReferralCode.text,
                               )).whenComplete(() {
-                                // etEmail.text = "";
-                                // etName.text = "";
-                                // etPassword.text = "";
-                                // etReferralCode.text = "";
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text("Account created!"),
@@ -78,7 +70,7 @@ class _HomePageState extends State<HomePage> {
                             }
                           : null,
                       child: const Text(
-                        'CREATE ACCOUNT',
+                        'CREATE',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
