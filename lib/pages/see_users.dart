@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../services/referral_service.dart';
-import 'components/add_redeem_dialog.dart';
+import 'components/redeem_dialog.dart';
 
 class SeeAllUsersPage extends StatelessWidget {
   const SeeAllUsersPage({super.key});
@@ -125,7 +125,7 @@ class SeeAllUsersPage extends StatelessWidget {
                     trailing: GestureDetector(
                       onTap: !item.isRedeemed
                           ? () {
-                              AddRedeemDialog.show(
+                              RedeemDialog.show(
                                 context: context,
                                 callback: (context, value) {
                                   ReferralService.redeemCode(item.id, value);
