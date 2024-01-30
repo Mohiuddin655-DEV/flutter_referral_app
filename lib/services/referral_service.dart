@@ -47,26 +47,40 @@ class ReferralService {
       );
       if (!isInvalidCode && !isInvalidUid && !isMember) {
         log.l("updateUser(current.id : $uid)");
+        final userDuration = getRemainingDuration(
+          createdAt: user.rewardCreatedAt,
+          days: user.rewardDuration,
+        );
+
+        final currentUDays = userDuration.inDays + Rewards.x1.duration;
+
         return _updateUser(uid, {
           UserKeys.i.redeemed: true,
           UserKeys.i.redeemedCode: referral.id,
           UserKeys.i.reward: Rewards.x1.category,
-          UserKeys.i.rewardDuration: Rewards.x1.duration,
+          UserKeys.i.rewardDuration: currentUDays,
           UserKeys.i.rewardCreatedAt: Rewards.x1.createdAt,
           UserKeys.i.rewardExpireAt: Rewards.x1.expireAt,
         }).then((_) {
           log.l("updateUser(referrer.id : ${referral.uid})");
-          return _updateUser(referral.uid, {
-            UserKeys.i.reward: Rewards.x2.category,
-            UserKeys.i.rewardDuration:
-                FieldValue.increment(Rewards.x2.duration),
-            UserKeys.i.rewardCreatedAt: Rewards.x2.createdAt,
-            UserKeys.i.rewardExpireAt: Rewards.x2.expireAt,
-          }).then((_) {
-            log.l("updateReferral(referral.id : ${referral.id})");
-            return _updateReferral(referral.id, {
-              ReferralKeys.i.members: FieldValue.arrayUnion([uid]),
-            }).then((_) => log.l("done"));
+          return _getUser(referral.uid).then((referrer) {
+            if (referrer == null) return Future.value(false);
+            final referrerDuration = getRemainingDuration(
+              createdAt: referrer.rewardCreatedAt,
+              days: referrer.rewardDuration,
+            );
+            final currentRDays = referrerDuration.inDays + Rewards.x2.duration;
+            return _updateUser(referral.uid, {
+              UserKeys.i.reward: Rewards.x2.category,
+              UserKeys.i.rewardDuration: currentRDays,
+              UserKeys.i.rewardCreatedAt: Rewards.x2.createdAt,
+              UserKeys.i.rewardExpireAt: Rewards.x2.expireAt,
+            }).then((_) {
+              log.l("updateReferral(referral.id : ${referral.id})");
+              return _updateReferral(referral.id, {
+                ReferralKeys.i.members: FieldValue.arrayUnion([uid]),
+              }).then((_) => log.l("done"));
+            });
           });
         });
       } else {
@@ -158,6 +172,21 @@ class ReferralService {
         return null;
       }
     });
+  }
+
+  static Duration getRemainingDuration({
+    required int? createdAt,
+    required int? days,
+  }) {
+    if (createdAt != null && days != null && days > 0) {
+      final creationDate = DateTime.fromMillisecondsSinceEpoch(createdAt);
+      final expireDate = creationDate.add(Duration(days: days));
+      final currentDate = DateTime.now();
+      final remainingDuration = expireDate.difference(currentDate);
+      return remainingDuration;
+    }
+
+    return Duration.zero;
   }
 
   static Future<UserModel?> _getUser(String? id) {
